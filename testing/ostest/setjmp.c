@@ -1,5 +1,5 @@
 /****************************************************************************
- * apps/system/libuv/tests/test_main.c
+ * apps/testing/ostest/setjmp.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,34 +23,34 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdio.h>
-#include <string.h>
 
-#include "runner.h"
-#include "test-list.h"
+#include <assert.h>
+#include <setjmp.h>
+#include <stdio.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, FAR char **argv)
+void setjmp_test(void)
 {
-  platform_init(argc, argv);
+  int value;
+  jmp_buf buf;
 
-  if (argc > 1)
+  printf("setjmp_test: Initializing jmp_buf\n");
+
+  if ((value = setjmp(buf)) == 0)
     {
-      if (strcmp(argv[1], "--list") == 0)
-        {
-          print_tests(stdout);
-          return 0;
-        }
+      printf("setjmp_test: Try jump\n");
+      longjmp(buf, 123);
 
-      if (argc > 2)
-        {
-          return run_test_part(argv[1], argv[2]);
-        }
+      /* Unreachable */
+
+      ASSERT(0);
     }
-
-  return run_tests(0);
+  else
+    {
+      ASSERT(value == 123);
+      printf("setjmp_test: Jump succeed\n");
+    }
 }
-

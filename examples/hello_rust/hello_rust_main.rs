@@ -1,5 +1,5 @@
 /****************************************************************************
- * apps/system/adb/shell_pipe.h
+ * apps/examples/hello_rust/hello_rust_main.rs
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,38 +19,56 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
+ * Attributes
  ****************************************************************************/
 
-#include <uv.h>
-#include "adb.h"
+#![no_main]
+#![no_std]
 
 /****************************************************************************
- * Private types
+ * Uses
  ****************************************************************************/
 
-struct shell_pipe_s
-{
-  uv_poll_t handle;
-  int write_fd;
-  void (*close_cb)(struct shell_pipe_s *);
-  void (*on_data_cb)(struct shell_pipe_s *, struct apacket_s *);
-};
-
-typedef struct shell_pipe_s shell_pipe_t;
+use core::panic::PanicInfo;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Externs
  ****************************************************************************/
 
-int shell_pipe_setup(adb_client_t *client, shell_pipe_t *pipe);
-int shell_pipe_start(shell_pipe_t *pipe,
-                     void (*on_data_cb)(shell_pipe_t *, apacket *));
-void shell_pipe_destroy(shell_pipe_t *pipe,
-                        void (*close_cb)(shell_pipe_t *));
-int shell_pipe_write(shell_pipe_t *pipe, const void *buf, size_t count);
+extern "C" {
+    pub fn printf(format: *const u8, ...) -> i32;
+}
 
-int shell_pipe_exec(char * const argv[], shell_pipe_t *pipe,
-                    void (*on_data_cb)(shell_pipe_t *, apacket *));
-int shell_exec_builtin(const char *appname, FAR char *const *argv,
-                       shell_pipe_t *apipe);
+/****************************************************************************
+ * Private functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Panic handler (needed for [no_std] compilation)
+ ****************************************************************************/
+
+#[panic_handler]
+fn panic(_panic: &PanicInfo<'_>) -> ! {
+    loop {}
+}
+
+/****************************************************************************
+ * Public functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * hello_rust_main
+ ****************************************************************************/
+
+#[no_mangle]
+pub extern "C" fn hello_rust_main(_argc: i32, _argv: *const *const u8) -> i32 {
+    /* "Hello, Rust!!" using printf() from libc */
+
+    unsafe {
+        printf(b"Hello, Rust!!\n\0" as *const u8);
+    }
+
+    /* exit with status 0 */
+
+    0
+}

@@ -1,5 +1,5 @@
 ############################################################################
-# apps/system/libuv/tests/Make.defs
+# apps/examples/hello_rust/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,19 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_LIBUV_UNIT_TESTS),)
-CONFIGURED_APPS += $(APPDIR)/system/libuv/tests
-endif
+include $(APPDIR)/Make.defs
+
+# Hello, Rust! built-in application info
+
+PROGNAME  = $(CONFIG_EXAMPLES_HELLO_RUST_PROGNAME)
+PRIORITY  = $(CONFIG_EXAMPLES_HELLO_RUST_PRIORITY)
+STACKSIZE = $(CONFIG_EXAMPLES_HELLO_RUST_STACKSIZE)
+MODULE    = $(CONFIG_EXAMPLES_HELLO_RUST)
+
+# Hello, Rust! Example
+
+MAINSRC = hello_rust_main.rs
+
+RUSTFLAGS += -C panic=abort
+
+include $(APPDIR)/Application.mk
