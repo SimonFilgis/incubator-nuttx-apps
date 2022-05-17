@@ -1,0 +1,19 @@
+--- mcuboot/boot/nuttx/main.c
++++ mcuboot/boot/nuttx/main.c
+@@ -52,7 +52,7 @@ static void do_boot(struct boot_rsp *rsp)
+   ret = flash_area_open(area_id, &flash_area);
+   assert(ret == OK);
+ 
+-  printf("Booting from %s...\n", flash_area->fa_mtd_path);
++  /* printf("Booting from %s...\n", flash_area->fa_mtd_path); */
+ 
+   info.path        = flash_area->fa_mtd_path;
+   info.header_size = rsp->br_hdr->ih_hdr_size;
+@@ -79,7 +79,7 @@ int main(int argc, FAR char *argv[])
+   struct boot_rsp rsp;
+   fih_int fih_rc = FIH_FAILURE;
+ 
+-  printf("*** Booting MCUboot build %s ***\n", CONFIG_MCUBOOT_VERSION);
++  /* printf("*** Booting MCUboot build %s ***\n", CONFIG_MCUBOOT_VERSION); */
+ 
+   FIH_CALL(boot_go, fih_rc, &rsp);
