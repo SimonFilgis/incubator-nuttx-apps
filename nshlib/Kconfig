@@ -245,6 +245,10 @@ config NSH_DISABLE_CMP
 	bool "Disable cmp"
 	default DEFAULT_SMALL
 
+config NSH_DISABLE_TIMEDATECTL
+	bool "Disable TIMEDATECTL"
+	default DEFAULT_SMALL || !LIBC_LOCALTIME || !RTC
+
 config NSH_DISABLE_DATE
 	bool "Disable date"
 	default DEFAULT_SMALL || !RTC
@@ -547,6 +551,12 @@ config NSH_DISABLE_XD
 	bool "Disable xd"
 	default DEFAULT_SMALL
 
+config NSH_DISABLE_RESET_CAUSE
+	bool "Disable reset cause"
+	default n if !DEFAULT_SMALL
+	default y if DEFAULT_SMALL
+	depends on BOARDCTL_RESET_CAUSE
+
 endmenu
 
 if MMCSD
@@ -690,8 +700,9 @@ config NSH_ROMFSETC
 	default n
 	depends on FS_ROMFS
 	---help---
-		Mount a ROMFS filesystem at /etc and provide a startup script
-		at /etc/init.d/rcS.  The default startup script will mount
+		Mount a ROMFS filesystem at /etc and provide a system init
+		script at /etc/init.d/rc.sysinit and a startup script
+		at /etc/init.d/rcS.  The default system init script will mount
 		a FAT FS RAMDISK at /tmp but the logic is easily extensible.
 
 if NSH_ROMFSETC
@@ -701,8 +712,9 @@ config NSH_CROMFSETC
 	default n
 	depends on FS_CROMFS
 	---help---
-		Mount a CROMFS filesystem at /etc and provide a compressed startup
-		script at /etc/init.d/rcS.
+		Mount a CROMFS filesystem at /etc and provide a compressed system
+		init script at /etc/init.d/rc.sysinit and a startup script
+		at /etc/init.d/rcS.
 
 config NSH_ROMFSRC
 	bool "Support ROMFS login script"
@@ -723,6 +735,14 @@ config NSH_ROMFSMOUNTPT
 		The default mountpoint for the ROMFS volume is /etc, but that
 		can be changed with this setting.  This must be a absolute path
 		beginning with '/'.
+
+config NSH_SYSINITSCRIPT
+	string "Relative path to sysinit script"
+	default "init.d/rc.sysinit"
+	---help---
+		This is the relative path to the sysinit script within the mountpoint.
+		The default is init.d/rc.sysinit. This is a relative path and must not
+		start with '/'.
 
 config NSH_INITSCRIPT
 	string "Relative path to startup script"

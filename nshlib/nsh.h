@@ -340,9 +340,16 @@
 #    define CONFIG_NSH_ROMFSMOUNTPT "/etc"
 #  endif
 
+#  ifndef CONFIG_NSH_SYSINITSCRIPT
+#    define CONFIG_NSH_SYSINITSCRIPT "init.d/rc.sysinit"
+#  endif
+
 #  ifndef CONFIG_NSH_INITSCRIPT
 #    define CONFIG_NSH_INITSCRIPT "init.d/rcS"
 #  endif
+
+#  undef NSH_SYSINITPATH
+#  define NSH_SYSINITPATH CONFIG_NSH_ROMFSMOUNTPT "/" CONFIG_NSH_SYSINITSCRIPT
 
 #  undef NSH_INITPATH
 #  define NSH_INITPATH CONFIG_NSH_ROMFSMOUNTPT "/" CONFIG_NSH_INITSCRIPT
@@ -490,7 +497,8 @@
  */
 
 #if defined(CONFIG_NSH_DISABLE_LS) && defined(CONFIG_NSH_DISABLE_CP) && \
-    defined(CONFIG_NSH_DISABLE_PS) && !defined(CONFIG_NSH_PLATFORM_MOTD)
+    defined(CONFIG_NSH_DISABLE_PS) && !defined(CONFIG_NSH_PLATFORM_MOTD) && \
+    defined(CONFIG_DISABLE_ENVIRON)
 #  undef NSH_HAVE_IOBUFFER
 #endif
 
@@ -828,6 +836,7 @@ int nsh_usbconsole(void);
 int nsh_script(FAR struct nsh_vtbl_s *vtbl, FAR const char *cmd,
                FAR const char *path);
 #ifdef CONFIG_NSH_ROMFSETC
+int nsh_sysinitscript(FAR struct nsh_vtbl_s *vtbl);
 int nsh_initscript(FAR struct nsh_vtbl_s *vtbl);
 #ifdef CONFIG_NSH_ROMFSRC
 int nsh_loginscript(FAR struct nsh_vtbl_s *vtbl);
@@ -974,6 +983,10 @@ int cmd_irqinfo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #if !defined(CONFIG_NSH_DISABLESCRIPT) && !defined(CONFIG_NSH_DISABLE_TEST)
   int cmd_test(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
   int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#ifndef CONFIG_NSH_DISABLE_TIMEDATECTL
+  int cmd_timedatectl(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #ifndef CONFIG_NSH_DISABLE_DATE
@@ -1154,6 +1167,10 @@ int cmd_pmconfig(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 
 #if defined(CONFIG_BOARDCTL_RESET) && !defined(CONFIG_NSH_DISABLE_REBOOT)
   int cmd_reboot(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#endif
+
+#if defined(CONFIG_BOARDCTL_RESET_CAUSE) && !defined(CONFIG_NSH_DISABLE_RESET_CAUSE)
+  int cmd_reset_cause(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 
 #if defined(CONFIG_RPTUN) && !defined(CONFIG_NSH_DISABLE_RPTUN)
@@ -1387,6 +1404,25 @@ void nsh_trimdir(FAR char *dirpath);
 #ifdef NSH_HAVE_TRIMSPACES
 FAR char *nsh_trimspaces(FAR char *str);
 #endif
+
+/****************************************************************************
+ * Name: nsh_getdirpath
+ *
+ * Description:
+ *   Combine dirpath with a file/path, this will genarated a new string,
+ *   which need free outside.
+ *
+ * Input Parameters:
+ *   dirpath - the dirpath
+ *   path    - the file/path
+ *
+ * Returned value:
+ *   The new string pointer, need free in caller.
+ *
+ ****************************************************************************/
+
+FAR char *nsh_getdirpath(FAR struct nsh_vtbl_s *vtbl,
+                         FAR const char *dirpath, FAR const char *path);
 
 /****************************************************************************
  * Name: nsh_getvar, nsh_setvar, and nsh_setvar

@@ -51,6 +51,7 @@ CFLAGS += -I$(LIBUV_UNPACK)/src/unix
 CFLAGS += -I$(LIBUV_UNPACK)/test
 CFLAGS += -Wno-shadow
 CFLAGS += -DDEF_THREADPOOL_SIZE=CONFIG_LIBUV_THREADPOOL_SIZE
+CFLAGS += -DDEF_THREADPOOL_STACKSIZE=CONFIG_LIBUV_THREAD_STACKSIZE
 
 VPATH += $(LIBUV_UNPACK)/src
 VPATH += $(LIBUV_UNPACK)/src/unix
@@ -68,10 +69,12 @@ CSRCS += posix-hrtime.c
 CSRCS += posix-poll.c
 CSRCS += uv-data-getter-setters.c
 CSRCS += version.c
+ifeq ($(CONFIG_LIBUV_UTILS_TEST),)
 CSRCS += idna.c
+CSRCS += strscpy.c
+endif
 CSRCS += no-fsevents.c
 CSRCS += uv-common.c
-CSRCS += strscpy.c
 CSRCS += random-devurandom.c
 CSRCS += random.c
 CSRCS += nuttx.c

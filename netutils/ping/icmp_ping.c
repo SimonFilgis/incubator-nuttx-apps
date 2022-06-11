@@ -315,14 +315,23 @@ void icmp_ping(FAR const struct ping_info_s *info)
 
           if (inhdr->type == ICMP_ECHO_REPLY)
             {
+#ifndef CONFIG_SIM_NETUSRSOCK
               if (ntohs(inhdr->id) != result.id)
                 {
                   icmp_callback(&result, ICMP_W_IDDIFF, ntohs(inhdr->id));
                   retry = true;
                 }
-              else if (ntohs(inhdr->seqno) > result.seqno)
+              else
+#endif
+              if (ntohs(inhdr->seqno) > result.seqno)
                 {
                   icmp_callback(&result, ICMP_W_SEQNOBIG,
+                                ntohs(inhdr->seqno));
+                  retry = true;
+                }
+              else if (ntohs(inhdr->seqno) < result.seqno)
+                {
+                  icmp_callback(&result, ICMP_W_SEQNOSMALL,
                                 ntohs(inhdr->seqno));
                   retry = true;
                 }
@@ -330,14 +339,6 @@ void icmp_ping(FAR const struct ping_info_s *info)
                 {
                   bool verified = true;
                   long pktdelay = elapsed;
-
-                  if (ntohs(inhdr->seqno) < result.seqno)
-                    {
-                      icmp_callback(&result, ICMP_W_SEQNOSMALL,
-                                    ntohs(inhdr->seqno));
-                      pktdelay += info->delay * USEC_PER_MSEC;
-                      retry     = true;
-                    }
 
                   icmp_callback(&result, ICMP_I_ROUNDTRIP, pktdelay);
 

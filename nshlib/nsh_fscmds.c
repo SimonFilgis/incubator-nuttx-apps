@@ -85,30 +85,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_getdirpath
- ****************************************************************************/
-
-#if !defined(CONFIG_NSH_DISABLE_LS) || !defined(CONFIG_NSH_DISABLE_CP)
-static char *nsh_getdirpath(FAR struct nsh_vtbl_s *vtbl,
-                            FAR const char *path, FAR const char *file)
-{
-  /* Handle the case where all that is left is '/' */
-
-  if (strcmp(path, "/") == 0)
-    {
-      snprintf(vtbl->iobuffer, IOBUFFERSIZE, "/%s", file);
-    }
-  else
-    {
-      snprintf(vtbl->iobuffer, IOBUFFERSIZE, "%s/%s", path, file);
-    }
-
-  vtbl->iobuffer[PATH_MAX] = '\0';
-  return strdup(vtbl->iobuffer);
-}
-#endif
-
-/****************************************************************************
  * Name: ls_specialdir
  ****************************************************************************/
 
@@ -361,8 +337,9 @@ static int ls_recursive(FAR struct nsh_vtbl_s *vtbl, const char *dirpath,
 
           ret = nsh_foreach_direntry(vtbl, "ls", newpath, ls_recursive,
                                      pvarg);
-          free(newpath);
         }
+
+      free(newpath);
     }
 
   return ret;
@@ -693,6 +670,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   bool teardown = false;
   bool readonly = false;
   off_t offset = 0;
+  int sectsize = 512;
   bool badarg = false;
   int ret = ERROR;
   int option;
@@ -701,13 +679,13 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   /* Get the losetup options:  Two forms are supported:
    *
    *   losetup -d <loop-device>
-   *   losetup [-o <offset>] [-r] <loop-device> <filename>
+   *   losetup [-o <offset>] [-r] [-s <sectsize> ] <loop-device> <filename>
    *
    * NOTE that the -o and -r options are accepted with the -d option, but
    * will be ignored.
    */
 
-  while ((option = getopt(argc, argv, "d:o:r")) != ERROR)
+  while ((option = getopt(argc, argv, "d:o:rs:")) != ERROR)
     {
       switch (option)
         {
@@ -722,6 +700,10 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
         case 'r':
           readonly = true;
+          break;
+
+        case 's':
+          sectsize = atoi(optarg);
           break;
 
         case '?':
@@ -800,7 +782,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
       setup.devname  = loopdev;   /* The loop block device to be created */
       setup.filename = filepath;  /* The file or character device to use */
-      setup.sectsize = 512;       /* The sector size to use with the block device */
+      setup.sectsize = sectsize;  /* The sector size to use with the block device */
       setup.offset   = offset;    /* An offset that may be applied to the device */
       setup.readonly = readonly;  /* True: Read access will be supported only */
 

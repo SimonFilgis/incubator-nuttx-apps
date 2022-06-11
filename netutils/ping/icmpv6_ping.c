@@ -314,14 +314,23 @@ void icmp6_ping(FAR const struct ping6_info_s *info)
 
           if (inhdr->type == ICMPv6_ECHO_REPLY)
             {
+#ifndef CONFIG_SIM_NETUSRSOCK
               if (ntohs(inhdr->id) != result.id)
                 {
                   icmp6_callback(&result, ICMPv6_W_IDDIFF, ntohs(inhdr->id));
                   retry = true;
                 }
-              else if (ntohs(inhdr->seqno) > result.seqno)
+              else
+#endif
+              if (ntohs(inhdr->seqno) > result.seqno)
                 {
                   icmp6_callback(&result, ICMPv6_W_SEQNOBIG,
+                                 ntohs(inhdr->seqno));
+                  retry = true;
+                }
+              else if (ntohs(inhdr->seqno) < result.seqno)
+                {
+                  icmp6_callback(&result, ICMPv6_W_SEQNOSMALL,
                                  ntohs(inhdr->seqno));
                   retry = true;
                 }
@@ -329,14 +338,6 @@ void icmp6_ping(FAR const struct ping6_info_s *info)
                 {
                   bool verified = true;
                   long pktdelay = elapsed;
-
-                  if (ntohs(inhdr->seqno) < result.seqno)
-                    {
-                      icmp6_callback(&result, ICMPv6_W_SEQNOSMALL,
-                                     ntohs(inhdr->seqno));
-                      pktdelay += info->delay * USEC_PER_MSEC;
-                      retry     = true;
-                    }
 
                   icmp6_callback(&result, ICMPv6_I_ROUNDTRIP, pktdelay);
 

@@ -154,6 +154,11 @@ static const struct cmdmap_s g_cmdmap[] =
   { "dirname",  cmd_dirname,  2, 2, "<path>" },
 #endif
 
+#ifndef CONFIG_NSH_DISABLE_TIMEDATECTL
+  { "timedatectl", cmd_timedatectl, 1, 3, "[set-timezone TZ]"
+  },
+#endif
+
 #ifndef CONFIG_NSH_DISABLE_DATE
   { "date",     cmd_date,     1, 4, "[-s \"MMM DD HH:MM:SS YYYY\"] [-u]" },
 #endif
@@ -218,7 +223,7 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifdef CONFIG_DEBUG_MM
 # ifndef CONFIG_NSH_DISABLE_MEMDUMP
-  { "memdump",  cmd_memdump,  1, 3, "[pid/used/free]" },
+  { "memdump",  cmd_memdump,  1, 3, "[pid/used/free/on/off]" },
 # endif
 #endif
 
@@ -273,7 +278,8 @@ static const struct cmdmap_s g_cmdmap[] =
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 # if defined(CONFIG_DEV_LOOP) && !defined(CONFIG_NSH_DISABLE_LOSETUP)
   { "losetup",   cmd_losetup, 3, 6,
-    "[-d <dev-path>] | [[-o <offset>] [-r] <dev-path> <file-path>]" },
+    "[-d <dev-path>] | [[-o <offset>] [-r] [-s <sect-size>] "
+    "<dev-path> <file-path>]" },
 # endif
 #endif
 
@@ -396,8 +402,8 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #if defined(CONFIG_PM) && !defined(CONFIG_NSH_DISABLE_PMCONFIG)
-  { "pmconfig", cmd_pmconfig,  1, 3,
-    "[stay|relax] [normal|idle|standby|sleep]" },
+  { "pmconfig", cmd_pmconfig,  1, 4,
+    "[stay|relax] [normal|idle|standby|sleep] [domain]" },
 #endif
 
 #if defined(CONFIG_BOARDCTL_POWEROFF) && !defined(CONFIG_NSH_DISABLE_POWEROFF)
@@ -439,6 +445,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "reboot",   cmd_reboot,   1, 2, NULL },
 #endif
 
+#if defined(CONFIG_BOARDCTL_RESET_CAUSE) && !defined(CONFIG_NSH_DISABLE_RESET_CAUSE)
+  { "resetcause",   cmd_reset_cause,   1, 1, NULL },
+#endif
+
 #ifdef NSH_HAVE_DIROPTS
 # ifndef CONFIG_NSH_DISABLE_RM
   { "rm",       cmd_rm,       2, 3, "[-r] <file-path>" },
@@ -466,7 +476,9 @@ static const struct cmdmap_s g_cmdmap[] =
 #endif
 
 #if defined(CONFIG_RPTUN) && !defined(CONFIG_NSH_DISABLE_RPTUN)
-  { "rptun",    cmd_rptun,    3, 3, "start|stop <dev-path>" },
+  { "rptun",    cmd_rptun,    3, 6,
+    "<start|stop|reset|panic|dump|ping> <path|all> "
+    "[value|times length ack]" },
 #endif
 
 #ifndef CONFIG_NSH_DISABLE_SET
