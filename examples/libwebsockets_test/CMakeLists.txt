@@ -1,0 +1,13 @@
+
+if(CONFIG_EXAMPLES_LIBWEBSOCKETS_TEST)
+  nuttx_add_application(
+    NAME        
+    ${CONFIG_EXAMPLES_LIBWEBSOCKETS_PROGNAME}
+    SRCS        
+    libwebsockets_test_main.c
+    STACKSIZE   
+    ${CONFIG_EXAMPLES_LIBWEBSOCKETS_TEST_STACKSIZE}
+    PRIORITY    
+    ${CONFIG_EXAMPLES_LIBWEBSOCKETS_TEST_PRIORITY}
+  )
+endif()

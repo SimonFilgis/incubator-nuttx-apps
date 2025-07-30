@@ -1,0 +1,5 @@
+# apps/examples/libwebsockets_test/Make.defs
+ifneq ($(CONFIG_EXAMPLES_LIBWEBSOCKETS_TEST),)
+
+CONFIGURED_APPS += $(APPDIR)/examples/libwebsockets_test
+endif

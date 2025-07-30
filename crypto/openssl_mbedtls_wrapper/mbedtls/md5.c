@@ -34,10 +34,6 @@
 uint8_t *MD5(const uint8_t *data, size_t len,
              uint8_t out[MD5_DIGEST_LENGTH])
 {
-  if (mbedtls_md5(data, len, out) != 0)
-    {
-      return NULL;
-    }
-
+  mbedtls_md5(data, len, out);
   return out;
 }

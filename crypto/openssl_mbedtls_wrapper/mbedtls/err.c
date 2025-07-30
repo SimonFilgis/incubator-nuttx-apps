@@ -42,3 +42,8 @@ void ERR_error_string_n(unsigned long e, char *buf, size_t len)
 {
   mbedtls_strerror(e, buf, len);
 }
+char *ERR_error_string(unsigned long e, char *buf)
+{
+  ERR_error_string_n(e, buf, 120); // 120 is OpenSSL's default buffer size
+  return buf;
+}

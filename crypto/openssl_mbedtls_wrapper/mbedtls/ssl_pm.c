@@ -29,7 +29,7 @@
 #include <openssl/ssl_local.h>
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
-
+#include <openssl/ssl.h>
 /* mbedtls include */
 #include "mbedtls/platform.h"
 #include "mbedtls/net_sockets.h"
@@ -38,6 +38,7 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/error.h"
 
+#include "mbedtls/ssl.h"
 #define X509_INFO_STRING_LENGTH 8192
 
 struct ssl_pm
@@ -855,7 +856,8 @@ int pkey_pm_load(EVP_PKEY *pk, const unsigned char *buffer, int len)
   mbedtls_ctr_drbg_init(&ctr_drbg);
 
   ret = mbedtls_pk_parse_key(pkey_pm->pkey, load_buf, len + 1,
-                             NULL, 0, mbedtls_ctr_drbg_random, &ctr_drbg);
+                            NULL, 0);  
+
   ssl_mem_free(load_buf);
 
   if (ret)
@@ -1075,3 +1077,14 @@ void SSL_set_SSL_CTX(SSL *ssl, SSL_CTX *ctx)
                               pkey_pm->pkey);
   mbedtls_ssl_set_hs_authmode(&ssl_pm->ssl, mode);
 }
+
+mbedtls_ssl_context *SSL_mbedtls_ssl_context_from_SSL(SSL *ssl)
+{
+    if (!ssl || !ssl->ssl_pm)
+        return NULL;
+
+    struct ssl_pm *ssl_pm = (struct ssl_pm *)ssl->ssl_pm;
+    return &ssl_pm->ssl;
+}
+
+const char *mbedtls_client_preload_filepath = NULL;

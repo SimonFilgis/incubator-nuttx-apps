@@ -209,6 +209,18 @@ int SSL_want_read(const SSL *ssl)
   return (SSL_want(ssl) == SSL_READING);
 }
 
+int SSL_want_write(const SSL *ssl)
+{
+  SSL_ASSERT1(ssl);
+
+  if (ssl->err)
+    {
+      return 0;
+    }
+
+  return (SSL_want(ssl) == SSL_WRITING);
+}
+
 int SSL_want_x509_lookup(const SSL *ssl)
 {
   SSL_ASSERT1(ssl);
